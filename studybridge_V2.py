@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyBridge AI — Grounded Tutoring for Every Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12233D;
+    --paper:#F7F5EF;
+    --marigold:#E7A33E;
+    --marigold-dim:#F3D9A8;
+    --slate:#3E5C86;
+    --sage:#4F7A5B;
+    --rust:#B85C4A;
+    --line:#D8D2C2;
+    --ink-soft:#4A5568;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  :focus-visible{ outline:2px solid var(--slate); outline-offset:2px; border-radius:4px; }
+  select:focus, textarea:focus, input:focus{
+    outline:none; border-color:var(--slate); box-shadow:0 0 0 3px rgba(62,92,134,.15);
+  }
+  ::selection{ background:var(--marigold-dim); }
+
+  /* ===== Header ===== */
+  .app-header{
+    background:linear-gradient(135deg, var(--ink) 0%, #1A3252 100%);
+    color:var(--paper);
+    padding:20px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    border-bottom:4px solid var(--marigold);
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .brand h1{ font-size:24px; font-weight:700; margin:0; letter-spacing:.2px; }
+  .brand .tag{ font-size:11px; color:var(--marigold-dim); text-transform:uppercase; letter-spacing:1.5px; }
+  @media (max-width:640px){
+    .app-header{ padding:16px 18px; }
+    .brand .tag{ display:block; width:100%; }
+    .who{ width:100%; justify-content:space-between; }
+    .who input{ width:150px; }
+    .tabs{ padding:0 10px; overflow-x:auto; }
+    .tab-btn{ padding:9px 14px 10px; font-size:13px; white-space:nowrap; }
+    main{ padding:22px 14px 60px; }
+    .row{ flex-direction:column; }
+  }
+  .who{ display:flex; align-items:center; gap:8px; }
+  .who input{
+    background:rgba(247,245,239,.08);
+    border:1px solid rgba(247,245,239,.3);
+    color:var(--paper);
+    padding:8px 12px;
+    border-radius:6px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    width:170px;
+  }
+  .who input::placeholder{ color:rgba(247,245,239,.55); }
+  .who label{ font-size:11px; color:var(--marigold-dim); text-transform:uppercase; letter-spacing:1px; }
+
+  /* ===== Tabs (notebook divider style) ===== */
+  .tabs{ display:flex; gap:4px; padding:0 24px; background:var(--ink); }
+  .tab-btn{
+    font-family:'Fraunces',serif;
+    font-size:14px;
+    font-weight:600;
+    padding:10px 20px 12px;
+    background:rgba(247,245,239,.06);
+    color:rgba(247,245,239,.7);
+    border:none;
+    border-radius:8px 8px 0 0;
+    cursor:pointer;
+    position:relative;
+    top:1px;
+    transition:background .15s, color .15s;
+  }
+  .tab-btn:hover{ background:rgba(247,245,239,.12); color:var(--paper); }
+  .tab-btn.active{ background:var(--paper); color:var(--ink); }
+
+  /* ===== Layout ===== */
+  main{ max-width:960px; margin:0 auto; padding:32px 24px 80px; }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .ledger{
+    background:var(--paper);
+    background-image:repeating-linear-gradient(var(--paper) 0 31px, var(--line) 31px 32px);
+    border:1px solid var(--line);
+    border-left:3px solid var(--marigold);
+    border-radius:4px;
+    padding:24px 26px;
+    margin-bottom:22px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(18,35,61,.04), 0 4px 14px rgba(18,35,61,.05);
+  }
+  .section-title{ font-size:21px; margin:0 0 4px; }
+  .section-sub{ color:var(--ink-soft); font-size:13.5px; margin:0 0 18px; }
+
+  label.field-label{ display:block; font-size:11.5px; text-transform:uppercase; letter-spacing:1px; color:var(--slate); font-weight:600; margin-bottom:6px; }
+  select, textarea, input[type=text]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea{ min-height:88px; resize:vertical; }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .row > div{ flex:1; min-width:160px; }
+
+  button.primary{
+    background:var(--marigold);
+    color:var(--ink);
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:11px 22px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow:0 2px 0 #C4832A;
+    transition:transform .1s, filter .15s, box-shadow .1s;
+  }
+  button.primary:hover{ filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 3px 0 #C4832A; }
+  button.primary:active{ transform:translateY(1px); box-shadow:0 1px 0 #C4832A; }
+  button.primary:disabled{ opacity:.55; cursor:not-allowed; }
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:12.5px;
+    padding:7px 14px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  button.ghost:hover{ border-color:var(--slate); color:var(--slate); }
+
+  .spinner-row{ display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:13px; margin-top:10px; }
+  .spinner{
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid var(--line); border-top-color:var(--marigold);
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .error-box{
+    background:#FBEAE6; border:1px solid var(--rust); color:#7A3626;
+    padding:10px 14px; border-radius:6px; font-size:13px; margin-top:10px;
+  }
+  .info-box{
+    background:#EEF3EC; border:1px solid var(--sage); color:#2F5239;
+    padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;
+  }
+  .fade-in{ animation: fadeIn .35s ease; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){
+    .fade-in{ animation:none; }
+    .spinner{ animation-duration:1.4s; }
+  }
+
+  /* answer + citations */
+  .answer-block{ font-size:14.5px; line-height:1.65; }
+  .answer-block p{ margin:0 0 10px; }
+  .cite-chip{
+    display:inline-flex; align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; font-weight:500;
+    background:var(--marigold-dim);
+    color:#6B4A16;
+    border-radius:4px;
+    padding:1px 6px;
+    margin:0 2px;
+    cursor:pointer;
+    border:1px solid #E0BE7A;
+    transition:background .15s, transform .1s;
+  }
+  .cite-chip:hover{ background:var(--marigold); transform:translateY(-1px); }
+  .source-card{
+    margin-top:14px; padding:12px 14px;
+    background:#FBF8F0; border:1px dashed var(--marigold);
+    border-radius:6px; font-size:13px; display:none;
+  }
+  .source-card.open{ display:block; }
+  .source-card .src-title{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--slate); margin-bottom:4px; font-weight:600; }
+
+  /* quiz */
+  .qz-q{ margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--line); }
+  .qz-q:last-child{ border-bottom:none; }
+  .qz-prompt{ font-weight:600; margin-bottom:10px; font-size:14.5px; }
+  .qz-opt{ display:flex; align-items:flex-start; gap:8px; padding:7px 10px; border-radius:6px; cursor:pointer; font-size:13.5px; transition:background .12s; }
+  .qz-opt:hover{ background:#F3EFE2; }
+  .qz-opt input{ margin-top:3px; }
+  .qz-result{ font-size:12.5px; margin-top:6px; padding:6px 10px; border-radius:5px; display:none; }
+  .qz-result.show{ display:block; }
+  .qz-result.correct{ background:#E7F1E9; color:var(--sage); }
+  .qz-result.wrong{ background:#FBEAE6; color:var(--rust); }
+
+  .badge{ display:inline-block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:3px 9px; border-radius:20px; }
+  .badge.diff-easy{ background:#E7F1E9; color:var(--sage); }
+  .badge.diff-medium{ background:var(--marigold-dim); color:#8A5F16; }
+  .badge.diff-hard{ background:#FBEAE6; color:var(--rust); }
+
+  .score-banner{ display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg, var(--ink), #1A3252); color:var(--paper); padding:14px 20px; border-radius:8px; margin-bottom:18px; border-left:4px solid var(--marigold); }
+  .score-banner .big{ font-family:'Fraunces',serif; font-size:28px; }
+
+  /* teacher */
+  .stu-card{ background:#fff; border:1px solid var(--line); border-left:4px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:14px; box-shadow:0 1px 2px rgba(18,35,61,.04); transition:border-color .15s; }
+  .stu-card.flag-attn{ border-left-color:var(--rust); }
+  .stu-card.flag-ok{ border-left-color:var(--sage); }
+  .stu-card.flag-new{ border-left-color:var(--slate); }
+  .stu-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;}
+  .stu-name{ font-family:'Fraunces',serif; font-size:17px; }
+  .flag{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:20px; }
+  .flag.attn{ background:#FBEAE6; color:var(--rust); }
+  .flag.ok{ background:#E7F1E9; color:var(--sage); }
+  .flag.new{ background:#EEF1F6; color:var(--slate); }
+  .stat-row{ display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); margin-bottom:8px; }
+  .stat-row b{ color:var(--ink); }
+  .weak-tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .weak-tag{ font-family:'IBM Plex Mono',monospace; font-size:11px; background:#FBEAE6; color:#7A3626; padding:3px 8px; border-radius:4px; }
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--ink-soft); }
+  .empty-state .display{ font-size:20px; color:var(--ink); margin-bottom:6px; }
+
+  footer{ text-align:center; padding:26px; color:var(--ink-soft); font-size:11.5px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand">
+    <h1>StudyBridge <span style="color:var(--marigold)">AI</span></h1>
+    <span class="tag">Grounded tutoring · adaptive practice · teacher insight</span>
+  </div>
+  <div class="who">
+    <label for="studentName">Student</label>
+    <input id="studentName" type="text" placeholder="Enter your name" maxlength="30">
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="doubt">Doubt Solver</button>
+  <button class="tab-btn" data-tab="practice">Practice</button>
+  <button class="tab-btn" data-tab="teacher">Teacher View</button>
+</div>
+
+<main>
+
+  <!-- ================= DOUBT PANEL ================= -->
+  <section class="panel active" id="panel-doubt">
+    <div class="ledger">
+      <h2 class="section-title">Ask your doubt</h2>
+      <p class="section-sub">Answers are grounded only in the open textbook excerpts below — every explanation cites its exact source.</p>
+
+      <div class="row">
+        <div>
+          <label class="field-label">Subject</label>
+          <select id="doubtSubject"></select>
+        </div>
+        <div>
+          <label class="field-label">Topic</label>
+          <select id="doubtTopic"></select>
+        </div>
+        <div>
+          <label class="field-label">Answer language</label>
+          <select id="doubtLang">
+            <option>English</option>
+            <option>Hindi</option>
+            <option>Hinglish (mixed)</option>
+          </select>
+        </div>
+      </div>
+      <label class="field-label">Your question</label>
+      <textarea id="doubtInput" placeholder="e.g. Why does a pencil look bent when I dip it in water?"></textarea>
+      <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+        <button class="primary" id="doubtSubmit">Explain step by step</button>
+        <span id="doubtStatus" class="spinner-row" style="display:none;"><span class="spinner"></span> Searching source material and drafting explanation…</span>
+      </div>
+      <div id="doubtError"></div>
+    </div>
+
+    <div id="doubtAnswerWrap"></div>
+  </section>
+
+  <!-- ================= PRACTICE PANEL ================= -->
+  <section class="panel" id="panel-practice">
+    <div class="ledger">
+      <h2 class="section-title">Adaptive practice</h2>
+      <p class="section-sub">Difficulty adjusts to your last quiz score. Weak topics from your history get extra weight.</p>
+      <div class="row">
+        <div>
+          <label class="field-label">Subject</label>
+          <select id="pracSubject"></select>
+        </div>
+        <div>
+          <label class="field-label">Topic</label>
+          <select id="pracTopic"></select>
+        </div>
+        <div style="max-width:140px;">
+          <label class="field-label">Difficulty</label>
+          <div id="pracDiffBadge" class="badge diff-medium" style="padding:9px 12px; display:inline-block;">MEDIUM</div>
+        </div>
+      </div>
+      <button class="primary" id="pracGenerate">Generate 5 questions</button>
+      <span id="pracStatus" class="spinner-row" style="display:none;"><span class="spinner"></span> Building questions tailored to your progress…</span>
+      <div id="pracError"></div>
+    </div>
+    <div id="pracQuizWrap"></div>
+  </section>
+
+  <!-- ================= TEACHER PANEL ================= -->
+  <section class="panel" id="panel-teacher">
+    <div class="ledger">
+      <h2 class="section-title">Class insight dashboard</h2>
+      <p class="section-sub">Aggregated from every student's doubt and quiz activity on this device's shared session data.</p>
+      <button class="ghost" id="teacherRefresh">Refresh</button>
+    </div>
+    <div id="teacherWrap"></div>
+  </section>
+
+</main>
+
+<footer>Built for the AI for Equitable Education Access hackathon · grounding is illustrative sample content, not the full NCERT corpus</footer>
+
+<script>
+(function(){
+
+/* ============================================================
+   1. KNOWLEDGE BASE  (small illustrative "open textbook" corpus)
+   ============================================================ */
+const KB = [
+  { id:"S1", subject:"Physics", topic:"Motion",
+    source:"NCERT Science, Class 9 — Ch. 8: Motion",
+    text:"Speed is the distance travelled by an object per unit time. Velocity is speed in a given direction. When an object speeds up, slows down, or changes direction, it is said to be accelerating; acceleration is the rate of change of velocity with time." },
+  { id:"S2", subject:"Physics", topic:"Motion",
+    source:"NCERT Science, Class 9 — Ch. 8: Motion",
+    text:"For motion in a straight line with constant acceleration, three equations connect initial velocity u, final velocity v, acceleration a, time t, and distance s: v = u + at, s = ut + (1/2)at^2, and v^2 = u^2 + 2as." },
+  { id:"S3", subject:"Physics", topic:"Light - Reflection",
+    source:"NCERT Science, Class 10 — Ch. 10: Light, Reflection and Refraction",
+    text:"When light passes from a rarer medium like air into a denser medium like water, it bends towards the normal; this bending is called refraction. It happens because light changes speed as it crosses the boundary between the two media." },
+  { id:"S4", subject:"Physics", topic:"Light - Reflection",
+    source:"NCERT Science, Class 10 — Ch. 10: Light, Reflection and Refraction",
+    text:"A pencil dipped in a glass of water appears bent at the water surface. This is a refraction effect: light rays from the submerged part of the pencil bend as they leave the water and enter the air, so the brain perceives the object at a shifted position." },
+  { id:"S5", subject:"Mathematics", topic:"Quadratic Equations",
+    source:"NCERT Mathematics, Class 10 — Ch. 4: Quadratic Equations",
+    text:"A quadratic equation in x is one that can be written in the form ax^2 + bx + c = 0, where a, b, c are real numbers and a is not zero. It can be solved by factorisation, by completing the square, or with the quadratic formula." },
+  { id:"S6", subject:"Mathematics", topic:"Quadratic Equations",
+    source:"NCERT Mathematics, Class 10 — Ch. 4: Quadratic Equations",
+    text:"The quadratic formula gives the roots as x = (-b ± sqrt(b^2 - 4ac)) / (2a). The term b^2 - 4ac is called the discriminant: if it is positive there are two distinct real roots, if zero there is one repeated real root, and if negative there are no real roots." },
+  { id:"S7", subject:"Mathematics", topic:"Fractions",
+    source:"NCERT Mathematics, Class 7 — Ch. 2: Fractions and Decimals",
+    text:"To add or subtract fractions, first convert them to equivalent fractions with the same denominator (a common denominator), then add or subtract the numerators and keep the denominator unchanged." },
+  { id:"S8", subject:"Mathematics", topic:"Fractions",
+    source:"NCERT Mathematics, Class 7 — Ch. 2: Fractions and Decimals",
+    text:"To multiply two fractions, multiply the numerators together and the denominators together. To divide by a fraction, multiply by its reciprocal — that is, flip the numerator and denominator of the divisor and then multiply." },
+  { id:"S9", subject:"Biology", topic:"Photosynthesis",
+    source:"NCERT Science, Class 10 — Ch. 6: Life Processes",
+    text:"Photosynthesis is the process by which green plants make food. Carbon dioxide and water combine in the presence of sunlight and chlorophyll to produce glucose and oxygen. The overall reaction is 6CO2 + 6H2O -> C6H12O6 + 6O2." },
+  { id:"S10", subject:"Biology", topic:"Photosynthesis",
+    source:"NCERT Science, Class 10 — Ch. 6: Life Processes",
+    text:"Photosynthesis mainly occurs in the leaves, inside cell organelles called chloroplasts, which contain the green pigment chlorophyll that absorbs sunlight. Stomata, tiny pores on the leaf surface, allow carbon dioxide in and oxygen out." },
+  { id:"S11", subject:"Biology", topic:"Cell Structure",
+    source:"NCERT Science, Class 9 — Ch. 5: The Fundamental Unit of Life",
+    text:"The cell is the basic structural and functional unit of life. Every cell is enclosed by a cell membrane that controls movement of substances in and out. Plant cells additionally have a rigid cell wall outside the membrane for support." },
+  { id:"S12", subject:"Biology", topic:"Cell Structure",
+    source:"NCERT Science, Class 9 — Ch. 5: The Fundamental Unit of Life",
+    text:"The nucleus, bound by a nuclear membrane, houses the cell's chromosomes and genetic material and directs the cell's activities. Mitochondria are the sites of cellular respiration and are often called the powerhouse of the cell." }
+];
+
+const SUBJECTS = [...new Set(KB.map(e=>e.subject))];
+function topicsFor(subject){ return [...new Set(KB.filter(e=>e.subject===subject).map(e=>e.topic))]; }
+
+/* ============================================================
+   2. STORAGE HELPERS  (window.storage wrapper, safe by design)
+   ============================================================ */
+async function getStudent(id){
+  try{
+    const r = await window.storage.get('student:'+id, true);
+    return r ? JSON.parse(r.value) : null;
+  }catch(e){ return null; }
+}
+async function saveStudent(profile){
+  try{
+    await window.storage.set('student:'+profile.id, JSON.stringify(profile), true);
+    return true;
+  }catch(e){ console.error('storage save failed', e); return false; }
+}
+async function listStudents(){
+  try{
+    const r = await window.storage.list('student:', true);
+    if(!r || !r.keys) return [];
+    const out = [];
+    for(const k of r.keys){
+      try{
+        const v = await window.storage.get(k, true);
+        if(v) out.push(JSON.parse(v.value));
+      }catch(e){ /* skip unreadable record */ }
+    }
+    return out;
+  }catch(e){ return []; }
+}
+async function rememberLastName(name){
+  try{ await window.storage.set('last-student-name', name, false); }catch(e){}
+}
+async function recallLastName(){
+  try{ const r = await window.storage.get('last-student-name', false); return r ? r.value : ''; }
+  catch(e){ return ''; }
+}
+
+function slugify(name){
+  return name.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') || 'student';
+}
+function blankProfile(id,name){
+  return { id, name, lastActive: new Date().toISOString(), doubts: [], quizzes: [],
+           subjectAccuracy: {}, difficulty: {} };
+}
+async function ensureProfile(){
+  const name = document.getElementById('studentName').value.trim();
+  if(!name){ throw new Error('Enter your name at the top first.'); }
+  const id = slugify(name);
+  let profile = await getStudent(id);
+  if(!profile) profile = blankProfile(id, name);
+  profile.name = name;
+  profile.lastActive = new Date().toISOString();
+  return profile;
+}
+
+/* ============================================================
+   3. CLAUDE API HELPER
+   ============================================================ */
+async function callClaude(system, userMsg, maxTokens){
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: maxTokens || 1200,
+      system: system,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+  if(!resp.ok){ throw new Error("AI request failed (status "+resp.status+"). Please try again."); }
+  const data = await resp.json();
+  const textBlocks = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text);
+  return textBlocks.join('\n').trim();
+}
+
+function stripJsonFence(text){
+  return text.replace(/```json/gi,'').replace(/```/g,'').trim();
+}
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ============================================================
+   4. TAB NAVIGATION
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'teacher') refreshTeacher();
+  });
+});
+
+/* ============================================================
+   5. SUBJECT / TOPIC DROPDOWNS
+   ============================================================ */
+function fillSubjectSelect(sel){
+  sel.innerHTML = SUBJECTS.map(s=>'<option value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</option>').join('');
+}
+function fillTopicSelect(sel, subject, withAuto){
+  const topics = topicsFor(subject);
+  let opts = topics.map(t=>'<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>').join('');
+  if(withAuto) opts = '<option value="auto">Auto-detect from question</option>' + opts;
+  sel.innerHTML = opts;
+}
+
+const doubtSubjectSel = document.getElementById('doubtSubject');
+const doubtTopicSel = document.getElementById('doubtTopic');
+const pracSubjectSel = document.getElementById('pracSubject');
+const pracTopicSel = document.getElementById('pracTopic');
+
+fillSubjectSelect(doubtSubjectSel);
+fillSubjectSelect(pracSubjectSel);
+fillTopicSelect(doubtTopicSel, doubtSubjectSel.value, true);
+doubtTopicSel.value = 'auto';
+fillTopicSelect(pracTopicSel, pracSubjectSel.value, false);
+
+doubtSubjectSel.addEventListener('change', ()=>{
+  fillTopicSelect(doubtTopicSel, doubtSubjectSel.value, true);
+  doubtTopicSel.value = 'auto';
+});
+pracSubjectSel.addEventListener('change', ()=> {
+  fillTopicSelect(pracTopicSel, pracSubjectSel.value, false);
+  updateDiffBadge();
+});
+pracTopicSel.addEventListener('change', updateDiffBadge);
+
+/* ============================================================
+   6. DOUBT SOLVER
+   ============================================================ */
+function scorePool(pool, words){
+  const scored = pool.map(e=>{
+    const hay = (e.text+' '+e.topic).toLowerCase();
+    const score = words.reduce((s,w)=> s + (hay.includes(w)?1:0), 0);
+    return { ...e, score };
+  });
+  scored.sort((a,b)=> b.score - a.score);
+  return scored;
+}
+
+/* Retrieval widens automatically when the chosen subject/topic doesn't match
+   the question, instead of just returning an empty-handed refusal. */
+function retrieveContext(subject, topic, questionText){
+  const words = (questionText||'').toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3);
+  let widened = null;
+
+  let pool = KB.filter(e=>e.subject===subject);
+  if(topic && topic !== 'auto') pool = pool.filter(e=>e.topic===topic);
+  let scored = scorePool(pool, words);
+
+  if(topic !== 'auto' && (scored.length===0 || scored[0].score===0)){
+    const subjectPool = scorePool(KB.filter(e=>e.subject===subject), words);
+    if(subjectPool.length && subjectPool[0].score > 0){
+      scored = subjectPool;
+      widened = 'topic';
+    }
+  }
+  if(scored.length===0 || scored[0].score===0){
+    const allPool = scorePool(KB, words);
+    if(allPool.length && allPool[0].score > 0){
+      scored = allPool;
+      widened = 'subject';
+    }
+  }
+  if(scored.length===0) scored = scorePool(KB.filter(e=>e.subject===subject), words);
+
+  return { results: scored.slice(0,3), widened };
+}
+
+document.getElementById('doubtSubmit').addEventListener('click', async ()=>{
+  const errBox = document.getElementById('doubtError');
+  const statusEl = document.getElementById('doubtStatus');
+  const btn = document.getElementById('doubtSubmit');
+  errBox.innerHTML = '';
+  const question = document.getElementById('doubtInput').value.trim();
+  if(!question){ errBox.innerHTML = '<div class="error-box">Type a question first.</div>'; return; }
+
+  let profile;
+  try{ profile = await ensureProfile(); }
+  catch(e){ errBox.innerHTML = '<div class="error-box">'+escapeHtml(e.message)+'</div>'; return; }
+
+  const subject = doubtSubjectSel.value;
+  const topic = doubtTopicSel.value;
+  const lang = document.getElementById('doubtLang').value;
+  const retrieval = retrieveContext(subject, topic, question);
+  const context = retrieval.results;
+
+  btn.disabled = true;
+  statusEl.style.display = 'flex';
+  document.getElementById('doubtAnswerWrap').innerHTML = '';
+
+  try{
+    const contextBlock = context.map(c=>'['+c.id+'] Source: '+c.source+'\n"'+c.text+'"').join('\n\n');
+    const system = "You are StudyBridge, a patient tutor for under-resourced school students in India. "+
+      "You must explain ONLY using the numbered source excerpts given to you — never invent facts beyond them. "+
+      "Write a short, simple, step-by-step explanation (3-6 short steps, plain language, no jargon unless you define it). "+
+      "Every factual claim must end with the bracket tag of the source it came from, e.g. [S1]. "+
+      "If the sources do not fully cover the question, say plainly what is missing rather than guessing. "+
+      "Respond in this language: "+lang+". Do not use markdown headers, just short paragraphs or a numbered list with plain text, and **bold** for key terms only.";
+    const user = "Source excerpts:\n\n"+contextBlock+"\n\nStudent question: "+question;
+    const answer = await callClaude(system, user, 900);
+
+    profile.doubts.unshift({ ts: Date.now(), subject, topic: topic==='auto'?'auto':topic, question, language: lang });
+    profile.doubts = profile.doubts.slice(0,20);
+    await saveStudent(profile);
+    await rememberLastName(profile.name);
+
+    renderDoubtAnswer(answer, context, retrieval.widened);
+  }catch(e){
+    errBox.innerHTML = '<div class="error-box">'+escapeHtml(e.message || 'Something went wrong. Please try again.')+'</div>';
+  }finally{
+    btn.disabled = false;
+    statusEl.style.display = 'none';
+  }
+});
+
+function renderDoubtAnswer(rawAnswer, context, widened){
+  const bySrc = {};
+  context.forEach(c=> bySrc[c.id] = c);
+
+  let html = escapeHtml(rawAnswer);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\[(S\d+)\]/g, function(_, id){
+    if(!bySrc[id]) return '';
+    return ' <span class="cite-chip" data-src="'+id+'">'+id+'</span>';
+  });
+  html = html.split(/\n{2,}/).map(p=>'<p>'+p.replace(/\n/g,'<br>')+'</p>').join('');
+
+  const sourceCards = context.map(c=>
+    '<div class="source-card" id="src-'+c.id+'"><div class="src-title">'+c.id+' · '+escapeHtml(c.source)+'</div>'+escapeHtml(c.text)+'</div>'
+  ).join('');
+
+  const widenNote = widened === 'subject'
+    ? '<div class="info-box">Your selected subject/topic didn\'t match this question, so the search was broadened across all subjects to find the right source.</div>'
+    : widened === 'topic'
+    ? '<div class="info-box">Your selected topic didn\'t match this question, so the search was broadened to the rest of the subject to find the right source.</div>'
+    : '';
+
+  document.getElementById('doubtAnswerWrap').innerHTML =
+    widenNote+
+    '<div class="card fade-in"><div class="answer-block">'+html+'</div>'+
+    '<div style="margin-top:8px; font-size:11.5px; color:var(--ink-soft);">Tap a citation tag to see the exact source excerpt.</div>'+
+    sourceCards+'</div>';
+
+  document.querySelectorAll('.cite-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const card = document.getElementById('src-'+chip.dataset.src);
+      if(card) card.classList.toggle('open');
+    });
+  });
+}
+
+/* ============================================================
+   7. ADAPTIVE PRACTICE
+   ============================================================ */
+async function updateDiffBadge(){
+  const badge = document.getElementById('pracDiffBadge');
+  const name = document.getElementById('studentName').value.trim();
+  let diff = 'medium';
+  if(name){
+    const profile = await getStudent(slugify(name));
+    if(profile && profile.difficulty && profile.difficulty[pracSubjectSel.value]){
+      diff = profile.difficulty[pracSubjectSel.value];
+    }
+  }
+  badge.className = 'badge diff-'+diff;
+  badge.textContent = diff.toUpperCase();
+  badge.dataset.diff = diff;
+}
+updateDiffBadge();
+
+function weakTopicsFor(profile, subject){
+  const weak = [];
+  Object.keys(profile.subjectAccuracy||{}).forEach(key=>{
+    if(!key.startsWith(subject+':')) return;
+    const stat = profile.subjectAccuracy[key];
+    if(stat.total >= 2 && (stat.correct/stat.total) < 0.5) weak.push(key.split(':')[1]);
+  });
+  return weak;
+}
+
+document.getElementById('pracGenerate').addEventListener('click', async ()=>{
+  const errBox = document.getElementById('pracError');
+  const statusEl = document.getElementById('pracStatus');
+  const btn = document.getElementById('pracGenerate');
+  errBox.innerHTML = '';
+
+  let profile;
+  try{ profile = await ensureProfile(); }
+  catch(e){ errBox.innerHTML = '<div class="error-box">'+escapeHtml(e.message)+'</div>'; return; }
+
+  const subject = pracSubjectSel.value;
+  const topic = pracTopicSel.value;
+  const difficulty = document.getElementById('pracDiffBadge').dataset.diff || 'medium';
+  const weak = weakTopicsFor(profile, subject);
+  const context = KB.filter(e=>e.subject===subject && e.topic===topic).map(e=>e.text).join(' ');
+
+  btn.disabled = true;
+  statusEl.style.display = 'flex';
+  document.getElementById('pracQuizWrap').innerHTML = '';
+
+  try{
+    const system = "You write short multiple-choice practice quizzes for school students, grounded strictly in the given source material. "+
+      "Return ONLY valid JSON, no prose, no markdown fences: an array of exactly 5 objects, each with keys "+
+      "question (string), options (array of exactly 4 strings), correctIndex (0-3 integer), explanation (short string), topic (short string subtopic label). "+
+      "Match difficulty level: "+difficulty+". "+
+      (weak.length ? ("Give extra weight to these subtopics the student is weak in: "+weak.join(', ')+". ") : "")+
+      "Base every question only on the given source text.";
+    const user = "Subject: "+subject+"\nTopic: "+topic+"\nSource text: "+context;
+    const raw = await callClaude(system, user, 1400);
+    let quiz;
+    try{ quiz = JSON.parse(stripJsonFence(raw)); }
+    catch(parseErr){ throw new Error("Could not read the generated quiz. Please try generating again."); }
+    if(!Array.isArray(quiz) || quiz.length===0) throw new Error("Quiz came back empty. Please try again.");
+
+    renderQuiz(quiz, { profile, subject, topic, difficulty });
+  }catch(e){
+    errBox.innerHTML = '<div class="error-box">'+escapeHtml(e.message || 'Could not generate the quiz. Please try again.')+'</div>';
+  }finally{
+    btn.disabled = false;
+    statusEl.style.display = 'none';
+  }
+});
+
+function renderQuiz(quiz, ctx){
+  const wrap = document.getElementById('pracQuizWrap');
+  let html = '<div class="card fade-in">';
+  quiz.forEach((q,i)=>{
+    html += '<div class="qz-q" data-idx="'+i+'">';
+    html += '<div class="qz-prompt">'+(i+1)+'. '+escapeHtml(q.question)+'</div>';
+    (q.options||[]).forEach((opt,oi)=>{
+      html += '<label class="qz-opt"><input type="radio" name="q'+i+'" value="'+oi+'"> <span>'+escapeHtml(opt)+'</span></label>';
+    });
+    html += '<div class="qz-result" id="qzr-'+i+'"></div>';
+    html += '</div>';
+  });
+  html += '<button class="primary" id="qzSubmit">Submit quiz</button>';
+  html += '<div id="qzScoreWrap"></div>';
+  html += '</div>';
+  wrap.innerHTML = html;
+
+  document.getElementById('qzSubmit').addEventListener('click', async ()=>{
+    let correct = 0;
+    const topicTally = {};
+    quiz.forEach((q,i)=>{
+      const picked = document.querySelector('input[name="q'+i+'"]:checked');
+      const resultEl = document.getElementById('qzr-'+i);
+      const subtopic = q.topic || ctx.topic;
+      topicTally[subtopic] = topicTally[subtopic] || {correct:0,total:0};
+      topicTally[subtopic].total++;
+      if(!picked){
+        resultEl.className = 'qz-result show wrong';
+        resultEl.textContent = 'Not answered. Correct: ' + (q.options[q.correctIndex]||'') + ' — ' + (q.explanation||'');
+        return;
+      }
+      const isCorrect = parseInt(picked.value,10) === q.correctIndex;
+      if(isCorrect){ correct++; topicTally[subtopic].correct++; }
+      resultEl.className = 'qz-result show ' + (isCorrect ? 'correct' : 'wrong');
+      resultEl.textContent = (isCorrect ? 'Correct. ' : 'Not quite. Correct answer: ' + (q.options[q.correctIndex]||'') + '. ') + (q.explanation||'');
+    });
+
+    const total = quiz.length;
+    const pct = total ? correct/total : 0;
+    document.getElementById('qzScoreWrap').innerHTML =
+      '<div class="score-banner" style="margin-top:16px;"><div>Score</div><div class="big">'+correct+' / '+total+'</div></div>';
+    document.getElementById('qzSubmit').disabled = true;
+
+    // update profile
+    const profile = ctx.profile;
+    profile.quizzes.unshift({ ts: Date.now(), subject: ctx.subject, topic: ctx.topic, difficulty: ctx.difficulty, score: correct, total });
+    profile.quizzes = profile.quizzes.slice(0,30);
+    profile.subjectAccuracy = profile.subjectAccuracy || {};
+    Object.keys(topicTally).forEach(t=>{
+      const key = ctx.subject+':'+t;
+      const prev = profile.subjectAccuracy[key] || {correct:0,total:0};
+      profile.subjectAccuracy[key] = { correct: prev.correct + topicTally[t].correct, total: prev.total + topicTally[t].total };
+    });
+    profile.difficulty = profile.difficulty || {};
+    let nextDiff = ctx.difficulty;
+    if(pct >= 0.8) nextDiff = ctx.difficulty === 'easy' ? 'medium' : 'hard';
+    else if(pct <= 0.4) nextDiff = ctx.difficulty === 'hard' ? 'medium' : 'easy';
+    profile.difficulty[ctx.subject] = nextDiff;
+    profile.lastActive = new Date().toISOString();
+
+    await saveStudent(profile);
+    await rememberLastName(profile.name);
+    updateDiffBadge();
+  });
+}
+
+/* ============================================================
+   8. TEACHER DASHBOARD
+   ============================================================ */
+function overallAccuracy(profile){
+  let c=0,t=0;
+  Object.values(profile.subjectAccuracy||{}).forEach(s=>{ c+=s.correct; t+=s.total; });
+  return t>0 ? c/t : null;
+}
+function weakList(profile){
+  return Object.entries(profile.subjectAccuracy||{})
+    .filter(([,s])=> s.total>=2 && (s.correct/s.total)<0.5)
+    .map(([k])=>k.replace(':',' · '));
+}
+function daysSince(iso){
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
+async function refreshTeacher(){
+  const wrap = document.getElementById('teacherWrap');
+  wrap.innerHTML = '<div class="spinner-row" style="justify-content:center;"><span class="spinner"></span> Loading class data…</div>';
+  const students = await listStudents();
+  if(students.length === 0){
+    wrap.innerHTML = '<div class="empty-state"><div class="display">No student activity yet</div>Once students use the Doubt Solver or Practice tabs, they will appear here.</div>';
+    return;
+  }
+  students.sort((a,b)=> (overallAccuracy(a) ?? 1) - (overallAccuracy(b) ?? 1));
+
+  let html = '';
+  students.forEach(s=>{
+    const acc = overallAccuracy(s);
+    const inactiveDays = daysSince(s.lastActive);
+    const weak = weakList(s);
+    let flag = { cls:'ok', label:'On track' };
+    if(acc === null) flag = { cls:'new', label:'No quizzes yet' };
+    else if(acc < 0.5) flag = { cls:'attn', label:'Needs attention' };
+    else if(inactiveDays >= 3) flag = { cls:'attn', label:'Inactive '+inactiveDays+'d' };
+
+    const totalQ = Object.values(s.subjectAccuracy||{}).reduce((a,b)=>a+b.total,0);
+    const totalC = Object.values(s.subjectAccuracy||{}).reduce((a,b)=>a+b.correct,0);
+
+    html += '<div class="stu-card flag-'+flag.cls+' fade-in">'+
+      '<div class="stu-head"><span class="stu-name">'+escapeHtml(s.name)+'</span>'+
+      '<span class="flag '+flag.cls+'">'+flag.label+'</span></div>'+
+      '<div class="stat-row">'+
+        '<span>Doubts asked: <b>'+(s.doubts?s.doubts.length:0)+'</b></span>'+
+        '<span>Quizzes taken: <b>'+(s.quizzes?s.quizzes.length:0)+'</b></span>'+
+        '<span>Accuracy: <b>'+(acc===null?'—':Math.round(acc*100)+'%')+'</b> ('+totalC+'/'+totalQ+')</span>'+
+        '<span>Last active: <b>'+(inactiveDays===0?'today':inactiveDays+'d ago')+'</b></span>'+
+      '</div>'+
+      (weak.length ? '<div class="weak-tags">'+weak.map(w=>'<span class="weak-tag">'+escapeHtml(w)+'</span>').join('')+'</div>' : '')+
+      '</div>';
+  });
+  wrap.innerHTML = html;
+}
+document.getElementById('teacherRefresh').addEventListener('click', refreshTeacher);
+
+/* ============================================================
+   9. INIT
+   ============================================================ */
+(async function init(){
+  try{
+    const last = await recallLastName();
+    if(last) document.getElementById('studentName').value = last;
+  }catch(e){}
+  updateDiffBadge();
+})();
+
+})();
+</script>
+</body>
+</html>
