@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css" rel="preload" as="style">
+<title>StudyBridge AI — Grounded Tutoring for Every Student</title>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand">
+    <h1>StudyBridge <span style="color:var(--marigold)">AI</span></h1>
+    <span class="tag">Grounded tutoring · adaptive practice · teacher insight</span>
+  </div>
+  <div class="who">
+    <label for="studentName">Student</label>
+    <input id="studentName" type="text" placeholder="Enter your name" maxlength="30">
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="doubt">Doubt Solver</button>
+  <button class="tab-btn" data-tab="practice">Practice</button>
+  <button class="tab-btn" data-tab="teacher">Teacher View</button>
+</div>
+
+<main>
+
+  <!-- ================= DOUBT PANEL ================= -->
+  <section class="panel active" id="panel-doubt">
+    <div class="ledger">
+      <h2 class="section-title">Ask your doubt</h2>
+      <p class="section-sub">Answers are grounded only in the open textbook excerpts below — every explanation cites its exact source.</p>
+
+      <div class="row">
+        <div>
+          <label class="field-label">Subject</label>
+          <select id="doubtSubject"></select>
+        </div>
+        <div>
+          <label class="field-label">Topic</label>
+          <select id="doubtTopic"></select>
+        </div>
+        <div>
+          <label class="field-label">Answer language</label>
+          <select id="doubtLang">
+            <option>English</option>
+            <option>Hindi</option>
+            <option>Hinglish (mixed)</option>
+          </select>
+        </div>
+      </div>
+      <label class="field-label">Your question</label>
+      <textarea id="doubtInput" placeholder="e.g. Why does a pencil look bent when I dip it in water?"></textarea>
+      <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+        <button class="primary" id="doubtSubmit">Explain step by step</button>
+        <span id="doubtStatus" class="spinner-row" style="display:none;"><span class="spinner"></span> Searching source material and drafting explanation…</span>
+      </div>
+      <div id="doubtError"></div>
+    </div>
+
+    <div id="doubtAnswerWrap"></div>
+  </section>
+
+  <!-- ================= PRACTICE PANEL ================= -->
+  <section class="panel" id="panel-practice">
+    <div class="ledger">
+      <h2 class="section-title">Adaptive practice</h2>
+      <p class="section-sub">Difficulty adjusts to your last quiz score. Weak topics from your history get extra weight.</p>
+      <div class="row">
+        <div>
+          <label class="field-label">Subject</label>
+          <select id="pracSubject"></select>
+        </div>
+        <div>
+          <label class="field-label">Topic</label>
+          <select id="pracTopic"></select>
+        </div>
+        <div style="max-width:140px;">
+          <label class="field-label">Difficulty</label>
+          <div id="pracDiffBadge" class="badge diff-medium" style="padding:9px 12px; display:inline-block;">MEDIUM</div>
+        </div>
+      </div>
+      <button class="primary" id="pracGenerate">Generate 5 questions</button>
+      <span id="pracStatus" class="spinner-row" style="display:none;"><span class="spinner"></span> Building questions tailored to your progress…</span>
+      <div id="pracError"></div>
+    </div>
+    <div id="pracQuizWrap"></div>
+  </section>
+
+  <!-- ================= TEACHER PANEL ================= -->
+  <section class="panel" id="panel-teacher">
+    <div class="ledger">
+      <h2 class="section-title">Class insight dashboard</h2>
+      <p class="section-sub">Aggregated from every student's doubt and quiz activity on this device's shared session data.</p>
+      <button class="ghost" id="teacherRefresh">Refresh</button>
+    </div>
+    <div id="teacherWrap"></div>
+  </section>
+
+</main>
+
+<footer>Built for the AI for Equitable Education Access hackathon · grounding is illustrative sample content, not the full NCERT corpus</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
