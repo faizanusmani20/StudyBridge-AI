@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyBridge AI — Grounded Tutoring for Every Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+
+<!-- ================= ONBOARDING (name only) ================= -->
+<div class="onboarding-backdrop" id="onboardingBackdrop" aria-hidden="true">
+  <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+    <div class="onboarding-top">
+      <div class="onboarding-brand"><span class="onboarding-brand-mark">✦</span> StudyBridge AI</div>
+    </div>
+    <div class="onboarding-body">
+      <section class="onboarding-step active" data-step="1">
+        <div class="onboarding-kicker">Welcome</div>
+        <h2 class="onboarding-title" id="onboardingTitle">What should we call you?</h2>
+        <p class="onboarding-sub">Just your name to get started — you can explore everything else right away.</p>
+        <input id="onName" class="onboarding-input" maxlength="30" placeholder="Enter your name" autocomplete="name">
+        <div id="onNameError" style="margin-top:8px;font-size:12px;color:#C84B58;display:none;">Please enter your name to continue.</div>
+      </section>
+    </div>
+    <div class="onboarding-footer">
+      <div class="onboarding-note">Takes 5 seconds.</div>
+      <div class="onboarding-actions">
+        <button class="onboarding-btn primary" id="onNextBtn" type="button">Start learning ✦</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-header">
+  <div class="brand">
+    <h1>StudyBridge <span style="color:var(--marigold)">AI</span></h1>
+    <span class="tag">Grounded tutoring · adaptive practice · teacher insight</span>
+  </div>
+  <div class="who">
+   <!-- <button class="demo-btn" id="demoModeBtn" type="button">🎬 Demo Mode</button> -->
+    <label for="studentName">Student</label>
+    <input id="studentName" type="text" placeholder="Enter your name" maxlength="30">
+  </div>
+</div>
+<div class="demo-banner" id="demoBanner"><span><strong>Hackathon Demo Mode</strong> · Sample learning history and scholarship profile loaded for a realistic end-to-end walkthrough.</span><button class="demo-reset" id="demoResetBtn" type="button">Reset demo</button></div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="home">Home</button>
+  <button class="tab-btn" data-tab="doubt">AI Tutor</button>
+  <button class="tab-btn" data-tab="practice">Practice</button>
+  <button class="tab-btn" data-tab="progress">Progress</button>
+  <button class="tab-btn" data-tab="teacher">Teacher View</button>
+  <button class="tab-btn" data-tab="scholar">Scholarships</button>
+</div>
+
+<main>
+
+  <!-- ================= STUDENT DASHBOARD ================= -->
+  <section class="panel active" id="panel-home">
+    <div class="home-wrap">
+      <div class="home-hero">
+        <div class="home-eyebrow">✦ AI-powered learning companion</div>
+        <h2 class="home-title" id="homeGreeting">Good day 👋</h2>
+        <p class="home-sub">Learn in your language, practice what you need, and discover opportunities matched to you.</p>
+        <div id="homeProfileChips" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:14px"></div>
+        <div class="home-search">
+          <input id="homeQuestion" type="text" placeholder="What are you struggling with today?" maxlength="500">
+          <button id="homeAskBtn">Ask AI →</button>
+        </div>
+      </div>
+      <div class="home-grid-3">
+        <div class="metric-card"><div class="metric-top"><span>Overall accuracy</span><span class="metric-icon">◔</span></div><div class="metric-value" id="homeAccuracy">—</div><div class="metric-note" id="homeAccuracyNote">Take a quiz to start tracking.</div></div>
+        <div class="metric-card"><div class="metric-top"><span>Questions practiced</span><span class="metric-icon">✓</span></div><div class="metric-value" id="homeQuestions">0</div><div class="metric-note" id="homeQuestionsNote">Your completed quiz questions.</div></div>
+        <div class="metric-card"><div class="metric-top"><span>Learning streak</span><span class="metric-icon">🔥</span></div><div class="metric-value" id="homeStreak">—</div><div class="metric-note">Keep showing up to build momentum.</div></div>
+      </div>
+      <div class="home-grid-2">
+        <div class="home-card"><div class="home-card-head"><div><h3>Continue learning</h3><p>Quick actions based on how you want to learn today.</p></div></div><div class="home-actions">
+          <button class="quick-action" data-go="doubt"><span class="qa-icon">✨</span><b>Ask AI Tutor</b><span>Get a grounded, step-by-step explanation.</span></button>
+          <button class="quick-action" data-go="practice"><span class="qa-icon">🧠</span><b>Practice weak areas</b><span>Generate questions tuned to your progress.</span></button>
+          <button class="quick-action" data-go="scholar"><span class="qa-icon">🎓</span><b>Find opportunities</b><span>Check scholarships that may fit your profile.</span></button>
+        </div></div>
+        <div class="home-card"><div class="home-card-head"><div><h3>Your progress</h3><p>See where your effort is going.</p></div></div><div id="homeProgressList"></div></div>
+      </div>
+      <div class="home-grid-2">
+        <div class="home-card"><div class="home-card-head"><div><h3>Recommended next</h3><p>Personalized from your recent performance.</p></div></div><div id="homeRecommendation"></div></div>
+        <div class="home-card"><div class="home-card-head"><div><h3>Scholarship opportunities</h3><p>Transparent matching, with official verification.</p></div></div><div id="homeScholarship"></div></div>
+      </div>
+      <div class="home-card"><div class="home-card-head"><div><h3>Recent learning activity</h3><p>Your latest questions and practice sessions.</p></div></div><div id="homeActivity"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= AI TUTOR 2.0 ================= -->
+  <section class="panel" id="panel-doubt">
+    <div class="ai-tutor-shell">
+      <div class="ai-hero">
+        <div class="ai-hero-inner">
+          <div class="ai-eyebrow">✨ StudyBridge Tutor · grounded AI</div>
+          <h2 class="ai-title">What are you trying to understand?</h2>
+          <p class="ai-sub">Ask in your own words. StudyBridge finds relevant learning sources, explains the idea step by step, and lets you practice it next.</p>
+
+          <div class="ai-composer">
+            <textarea id="doubtInput" placeholder="Try: Why does a pencil look bent when I dip it in water?"></textarea>
+            <div class="ai-composer-row">
+              <div class="ai-composer-actions">
+                <select id="doubtTopic" class="ai-mini-select" aria-label="Topic"></select>
+                <select id="doubtLang" class="ai-mini-select" aria-label="Answer language">
+                  <option>English</option>
+                  <option>Hindi</option>
+                  <option>Hinglish (mixed)</option>
+                </select>
+              </div>
+              <button class="ai-send" id="doubtSubmit" type="button">Explain →</button>
+            </div>
+          </div>
+
+          <div class="ai-prompt-row">
+            <button class="ai-prompt-chip" data-ai-prompt="Explain this like I'm in Class 6">🧒 Explain simply</button>
+            <button class="ai-prompt-chip" data-ai-prompt="Give me a real-life example">💡 Give an example</button>
+            <button class="ai-prompt-chip" data-ai-prompt="Test me with 5 questions">🧠 Quiz me</button>
+            <button class="ai-prompt-chip" data-ai-prompt="Explain the key formula or rule">📐 Show the key rule</button>
+          </div>
+
+          <div class="ai-trust-row">
+            <span class="ai-trust-pill">✓ Source-grounded when evidence is available</span>
+            <span class="ai-trust-pill">🌐 English · Hindi · Hinglish</span>
+            <button type="button" id="doubtClearBtn" class="demo-btn" style="margin-left:auto;">🗑 Clear chat</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="doubtStatus" class="ai-loading-card" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:var(--ink);"><span class="spinner"></span><span>Finding relevant learning sources and building your explanation…</span></div>
+        <div class="ai-loading-line" style="margin-top:15px;width:92%;"></div>
+        <div class="ai-loading-line" style="width:76%;"></div>
+        <div class="ai-loading-line" style="width:56%;"></div>
+      </div>
+
+      <div class="ai-workspace">
+        <div id="doubtAnswerWrap" class="ai-answer-shell">
+          <div class="ai-empty"><strong style="color:var(--ink);">Your explanation will appear here.</strong><br>Ask a question above, then use the follow-up actions to learn more.</div>
+        </div>
+
+        <aside class="ai-side-card">
+          <h3 class="ai-side-title">Learn smarter</h3>
+          <p class="ai-side-sub">A few ways to get better answers from your tutor.</p>
+          <div class="ai-tip"><b>Be specific</b><span>Include the exact concept, question, or formula you are stuck on.</span></div>
+          <div class="ai-tip"><b>Pick your level</b><span>Ask for a simpler explanation when a topic feels too advanced.</span></div>
+          <div class="ai-tip"><b>Check the source</b><span>Open the cited source excerpt to see why the explanation is grounded.</span></div>
+          <div class="ai-tip"><b>Practice next</b><span>Turn your doubt into a personalized quiz after you understand it.</span></div>
+        </aside>
+      </div>
+      <div id="doubtError"></div>
+    </div>
+  </section>
+
+  <!-- ================= PRACTICE PANEL ================= -->
+  <section class="panel" id="panel-practice">
+    <div class="ledger">
+      <h2 class="section-title">Adaptive practice</h2>
+      <p class="section-sub">Difficulty adjusts to your last quiz score. Weak topics from your history get extra weight.</p>
+      <div class="row">
+        <div>
+          <label class="field-label">Subject</label>
+          <select id="pracSubject"></select>
+        </div>
+        <div>
+          <label class="field-label">Topic</label>
+          <select id="pracTopic"></select>
+        </div>
+        <div style="max-width:140px;">
+          <label class="field-label">Difficulty</label>
+          <div id="pracDiffBadge" class="badge diff-medium" style="padding:9px 12px; display:inline-block;">MEDIUM</div>
+        </div>
+      </div>
+      <button class="primary" id="pracGenerate">Generate 5 questions</button>
+      <span id="pracStatus" class="spinner-row" style="display:none;"><span class="spinner"></span> Building questions tailored to your progress…</span>
+      <div id="pracError"></div>
+    </div>
+    <div id="pracQuizWrap"></div>
+  </section>
+
+  <!-- ================= PROGRESS PANEL ================= -->
+  <section class="panel" id="panel-progress">
+    <div class="progress-shell">
+      <div class="progress-hero">
+        <div class="progress-eyebrow">✦ Adaptive learning map</div>
+        <h2 id="progressHeadline">Your learning, in motion.</h2>
+        <p id="progressSubhead">StudyBridge turns your practice history into a simple next-step plan.</p>
+        <div class="progress-summary">
+          <div class="progress-stat"><span>Accuracy</span><strong id="progAccuracy">—</strong></div>
+          <div class="progress-stat"><span>Questions</span><strong id="progQuestions">0</strong></div>
+          <div class="progress-stat"><span>Streak</span><strong id="progStreak">—</strong></div>
+          <div class="progress-stat"><span>Weak areas</span><strong id="progWeak">0</strong></div>
+        </div>
+      </div>
+
+      <div class="progress-grid">
+        <div class="progress-card">
+          <div class="progress-card-head"><div><h3>Subject mastery</h3><p>Built from your completed practice questions.</p></div><span class="badge diff-medium">LIVE</span></div>
+          <div id="progressSubjects"></div>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-card-head"><div><h3>Needs attention</h3><p>Topics where more focused practice can help.</p></div></div>
+          <div class="weak-card" id="progressWeakList"></div>
+        </div>
+      </div>
+
+      <div class="progress-grid">
+        <div class="progress-card">
+          <div class="progress-card-head"><div><h3>Your next 3 steps</h3><p>A small plan beats a giant syllabus.</p></div></div>
+          <div class="path-list" id="progressPath"></div>
+        </div>
+        <div class="progress-card">
+          <div class="progress-card-head"><div><h3>Adaptive logic</h3><p>How StudyBridge decides what to recommend next.</p></div></div>
+          <div class="path-list">
+            <div class="path-item"><div class="path-step">1</div><div><b>Measure</b><span>Quiz results update your topic and subject accuracy.</span></div></div>
+            <div class="path-item"><div class="path-step">2</div><div><b>Detect</b><span>Topics below 50% accuracy become higher-priority practice areas.</span></div></div>
+            <div class="path-item"><div class="path-step">3</div><div><b>Adapt</b><span>Difficulty moves up or down based on your recent score.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TEACHER PANEL ================= -->
+  <section class="panel" id="panel-teacher">
+    <div class="ledger">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div>
+          <div class="eyebrow">Teacher Insight Agent</div>
+          <h2 class="section-title">Class insight dashboard</h2>
+          <p class="section-sub">Turn learning activity into clear intervention signals — without exposing private student answer text.</p>
+        </div>
+        <button class="ghost" id="teacherRefresh">Refresh insights</button>
+      </div>
+    </div>
+    <div id="teacherWrap"></div>
+  </section>
+
+  <!-- ================= SCHOLARSHIP MATCHER PANEL ================= -->
+  <section class="panel" id="panel-scholar">
+    <div class="ledger">
+      <h2 class="section-title">Scholarship &amp; eligibility matcher</h2>
+      <p class="section-sub">Rule-based matching against your profile — fully transparent, no AI guessing on eligibility.</p>
+      <div class="info-box">Sample scheme data for this demo, not a live feed. Always confirm current criteria and deadlines on the official <a href="https://scholarships.gov.in" target="_blank" rel="noopener" style="color:#2F5239; font-weight:600;">National Scholarship Portal</a> before applying.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px"><span class="badge diff-easy">Transparent rules</span><span class="badge diff-medium">Profile-based</span><span class="badge diff-hard">Verify before applying</span></div>
+
+      <div class="row">
+        <div>
+          <label class="field-label">Current class / year</label>
+          <select id="scClass">
+            <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option>
+            <option value="9">Class 9</option><option value="10">Class 10</option>
+            <option value="11" selected>Class 11</option><option value="12">Class 12</option>
+            <option value="13">Undergraduate</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Category</label>
+          <select id="scCategory">
+            <option>General</option><option>EWS</option><option>OBC</option><option>SC</option><option>ST</option><option>Minority</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Gender</label>
+          <select id="scGender">
+            <option>Female</option><option>Male</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label class="field-label">Annual family income (₹)</label>
+          <input type="text" id="scIncome" placeholder="e.g. 150000" inputmode="numeric">
+        </div>
+        <div>
+          <label class="field-label">Stream / field of study</label>
+          <select id="scStream">
+            <option value="any">General / not decided</option>
+            <option value="science">Science</option>
+            <option value="technical">Engineering / Technical / Diploma</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:flex-end; padding-bottom:9px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="scDisability" style="width:16px; height:16px;"> I have a disability certificate
+          </label>
+        </div>
+      </div>
+      <button class="primary" id="scFind">Find matching scholarships</button>
+      <div id="scError"></div>
+    </div>
+    <div id="scResults"></div>
+  </section>
+
+</main>
+
+<footer>Built for the AI for Equitable Education Access hackathon · Demo content is illustrative; verify official sources and scholarship criteria.</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
