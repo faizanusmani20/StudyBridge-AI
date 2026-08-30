@@ -10,7 +10,7 @@
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20StudyBridge-5B5CE2?style=for-the-badge&logo=googlechrome&logoColor=white)](https://relentlessumbra.codeberg.page/StudyBridge_AI/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20StudyBridge-5B5CE2?style=for-the-badge&logo=googlechrome&logoColor=white)](https://faizanusmani20.github.io/StudyBridge-AI/)
 [![Hackathon](https://img.shields.io/badge/Hackathon-AI%20for%20Equitable%20Education-171827?style=for-the-badge)](#hackathon-alignment)
 [![Focus](https://img.shields.io/badge/Focus-Personalized%20Learning-23A26D?style=for-the-badge)](#key-features)
 
@@ -235,7 +235,7 @@ The API key is kept server-side in Cloudflare rather than exposed in the public 
 
 ### [Open StudyBridge AI →](https://relentlessumbra.codeberg.page/StudyBridge_AI/)
 
-[![Open Live Demo](https://img.shields.io/badge/OPEN%20LIVE%20DEMO-StudyBridge%20AI-5B5CE2?style=for-the-badge)](https://relentlessumbra.codeberg.page/StudyBridge_AI/)
+[![Open Live Demo](https://img.shields.io/badge/OPEN%20LIVE%20DEMO-StudyBridge%20AI-5B5CE2?style=for-the-badge)](https://faizanusmani20.github.io/StudyBridge-AI/)
 
 </div>
 
@@ -269,7 +269,7 @@ StudyBridge AI is built on the belief that better learning support shouldn't dep
 
 <br/>
 
-[![Try StudyBridge AI](https://img.shields.io/badge/Try%20StudyBridge%20AI-Live%20Demo-5B5CE2?style=for-the-badge)](https://relentlessumbra.codeberg.page/StudyBridge_AI/)
+[![Try StudyBridge AI](https://img.shields.io/badge/Try%20StudyBridge%20AI-Live%20Demo-5B5CE2?style=for-the-badge)](https://faizanusmani20.github.io/StudyBridge-AI/)
 
 <sub>StudyBridge AI — Grounded tutoring, adaptive practice, teacher insight, and equitable education access.</sub>
 
